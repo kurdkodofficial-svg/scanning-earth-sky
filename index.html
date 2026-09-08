@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پشکنینی ئاسمان و زەوی</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;900&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  :root {
+    --sky-deep: #0a1628;
+    --sky-mid: #1b3a5c;
+    --sky-low: #4a90c4;
+    --horizon: #c2956b;
+    --ground-surface: #8b6f47;
+    --ground-shallow: #6b4e31;
+    --ground-mid: #4a3520;
+    --ground-deep: #2d1e12;
+    --accent-gold: #d4a853;
+    --accent-teal: #5ba8a0;
+    --text-light: #f0e6d3;
+    --text-muted: #a89880;
+    --card-bg: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    background: var(--ground-deep);
+    color: var(--text-light);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* === HERO SECTION === */
+  .hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      #050d1a 0%,
+      #0a1a35 15%,
+      #14365e 30%,
+      #2a6fa0 45%,
+      #5ba8d4 55%,
+      #a8d4e6 62%,
+      #f0d8a8 67%,
+      #c2956b 70%,
+      #8b6f47 75%,
+      #6b4e31 82%,
+      #4a3520 90%,
+      #2d1e12 100%
+    );
+  }
+
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  /* Stars */
+  .stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    pointer-events: none;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+
+  /* Clouds */
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50px;
+    filter: blur(8px);
+    animation: drift 30s infinite linear;
+  }
+
+  @keyframes drift {
+    0% { transform: translateX(-100px); }
+    50% { transform: translateX(100px); }
+    100% { transform: translateX(-100px); }
+  }
+
+  /* Depth scale */
+  .depth-scale {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    z-index: 10;
+  }
+
+  .depth-mark {
+    font-size: 11px;
+    color: rgba(240,230,211,0.5);
+    font-family: 'Playfair Display', serif;
+    direction: ltr;
+    padding: 2px 0;
+    position: relative;
+  }
+
+  .depth-mark::before {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    width: 12px;
+    height: 1px;
+    background: rgba(240,230,211,0.2);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 0 20px;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    background: linear-gradient(180deg, #a8d4e6 0%, #f0d8a8 50%, #8b6f47 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    font-weight: 300;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 40px;
+    line-height: 1.8;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: bob 2s infinite;
+  }
+
+  .scroll-indicator i {
+    color: var(--accent-gold);
+    font-size: 20px;
+  }
+
+  .scroll-indicator span {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* === NAVIGATION === */
+  .nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,22,40,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    transition: background 0.3s;
+  }
+
+  .nav-logo {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    direction: rtl;
+  }
+
+  .nav-tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.25s;
+    border: none;
+    background: none;
+    position: relative;
+  }
+
+  .nav-tab:hover {
+    color: var(--text-light);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .nav-tab.active {
+    color: var(--accent-gold);
+    background: rgba(212,168,83,0.1);
+  }
+
+  .nav-tab i {
+    margin-left: 6px;
+  }
+
+  /* === SECTIONS === */
+  .section {
+    padding: 80px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.8s, transform 0.8s;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-header {
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .badge-sky {
+    background: rgba(74,144,196,0.15);
+    color: var(--sky-low);
+    border: 1px solid rgba(74,144,196,0.2);
+  }
+
+  .badge-ground {
+    background: rgba(139,111,71,0.15);
+    color: var(--ground-surface);
+    border: 1px solid rgba(139,111,71,0.2);
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .section-desc {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.9;
+  }
+
+  /* === SKY SECTION === */
+  .sky-bg {
+    background: linear-gradient(180deg, #0a1a35 0%, #14365e 40%, #1b3a5c 100%);
+  }
+
+  .atmosphere-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  .atmo-layer {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+  }
+
+  .atmo-layer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .atmo-color {
+    width: 12px;
+    flex-shrink: 0;
+  }
+
+  .atmo-content {
+    flex: 1;
+    padding: 20px 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .atmo-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .atmo-range {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    direction: ltr;
+    text-align: left;
+  }
+
+  .atmo-detail {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    padding: 0 24px;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .atmo-layer.expanded .atmo-detail {
+    max-height: 200px;
+    padding: 16px 24px;
+  }
+
+  .atmo-expand-icon {
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: transform 0.3s;
+  }
+
+  .atmo-layer.expanded .atmo-expand-icon {
+    transform: rotate(180deg);
+  }
+
+  /* Sky chart area */
+  .sky-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  @media (max-width: 768px) {
+    .sky-charts { grid-template-columns: 1fr; }
+  }
+
+  .chart-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 24px;
+    position: relative;
+  }
+
+  .chart-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .chart-card-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .chart-container {
+    width: 100%;
+    height: 280px;
+    direction: ltr;
+  }
+
+  .chart-insight {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: rgba(91,168,160,0.08);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: var(--accent-teal);
+    line-height: 1.7;
+  }
+
+  /* === GROUND SECTION === */
+  .ground-bg {
+    background: linear-gradient(180deg, #2d1e12 0%, #1a1008 100%);
+  }
+
+  .depth-explorer {
+    margin-top: 48px;
+    position: relative;
+  }
+
+  .depth-column {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .depth-line {
+    position: absolute;
+    right: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--horizon), var(--ground-deep));
+    transform: translateX(50%);
+  }
+
+  .depth-node {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 32px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .depth-node:nth-child(odd) {
+    flex-direction: row-reverse;
+  }
+
+  .depth-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    border: 3px solid var(--ground-mid);
+    position: absolute;
+    right: 50%;
+    transform: translateX(50%);
+    top: 8px;
+    z-index: 2;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .depth-node:hover .depth-dot {
+    transform: translateX(50%) scale(1.3);
+    box-shadow: 0 0 20px rgba(212,168,83,0.4);
+  }
+
+  .depth-card {
+    width: calc(50% - 40px);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: transform 0.3s, background 0.3s;
+  }
+
+  .depth-node:hover .depth-card {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .depth-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .depth-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .depth-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .depth-card-depth {
+    font-size: 0.75rem;
+    color: var(--accent-gold);
+    direction: ltr;
+  }
+
+  .depth-card-body {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .depth-card-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .depth-tag {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* Ground charts */
+  .ground-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 768px) {
+    .ground-charts { grid-template-columns: 1fr; }
+  }
+
+  /* === MINERALS SECTION === */
+  .minerals-bg {
+    background: linear-gradient(180deg, #2d1e12 0%, #1a1209 50%, #0f0a05 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .minerals-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 40%, rgba(212,168,83,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 60%, rgba(180,120,60,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .mineral-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 48px;
+  }
+
+  .mineral-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+
+  .mineral-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+
+  .mineral-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--mineral-accent);
+  }
+
+  .mineral-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .mineral-crystal {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .mineral-crystal::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    pointer-events: none;
+  }
+
+  .mineral-name-ku {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .mineral-name-en {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    direction: ltr;
+    text-align: left;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+  }
+
+  .mineral-info {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+
+  .mineral-props {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .mineral-prop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+
+  .mineral-prop-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .mineral-prop-label {
+    color: rgba(240,230,211,0.4);
+    font-size: 0.68rem;
+  }
+
+  .mineral-prop-value {
+    font-weight: 600;
+    direction: ltr;
+    text-align: left;
+  }
+
+  .mineral-depth-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.78rem;
+  }
+
+  .mineral-depth-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mineral-depth-fill {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .mineral-depth-text {
+    font-size: 0.72rem;
+    color: var(--accent-gold);
+    direction: ltr;
+    white-space: nowrap;
+  }
+
+  /* Mineral charts */
+  .mineral-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  @media (max-width: 768px) {
+    .mineral-charts { grid-template-columns: 1fr; }
+    .mineral-grid { grid-template-columns: 1fr; }
+  }
+
+  .mineral-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+    justify-content: center;
+  }
+
+  .mineral-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .mineral-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+
+  /* === COMPARISON SECTION === */
+  .comparison-bg {
+    background: linear-gradient(180deg, #14365e 0%, #2d1e12 100%);
+  }
+
+  .comparison-container {
+    margin-top: 48px;
+  }
+
+  .comparison-card {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 0;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 768px) {
+    .comparison-card {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+
+  .comp-side {
+    padding: 24px;
+    border-radius: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+  }
+
+  .comp-sky { text-align: left; direction: rtl; }
+  .comp-ground { text-align: right; direction: rtl; }
+
+  .comp-vs {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--accent-gold);
+    font-family: 'Playfair Display', serif;
+  }
+
+  .comp-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .comp-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .comp-unit {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* === STATS ROW === */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 40px;
+  }
+
+  .stat-card {
+    padding: 24px;
+    border-radius: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    text-align: center;
+    transition: transform 0.3s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .stat-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 900;
+    font-family: 'Playfair Display', serif;
+    direction: ltr;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* === FOOTER === */
+  .footer {
+    padding: 40px 24px;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .footer-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.9;
+  }
+
+  .footer-source {
+    margin-top: 16px;
+    font-size: 0.72rem;
+    color: rgba(168,152,128,0.5);
+    direction: ltr;
+  }
+
+  /* === ANIMATIONS === */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    animation: fadeUp 0.8s ease forwards;
+  }
+
+  .fade-up-delay-1 { animation-delay: 0.1s; opacity: 0; }
+  .fade-up-delay-2 { animation-delay: 0.2s; opacity: 0; }
+  .fade-up-delay-3 { animation-delay: 0.3s; opacity: 0; }
+
+  /* Particle rain for underground */
+  .dust-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(139,111,71,0.3);
+    border-radius: 50%;
+    animation: dustfall 8s infinite linear;
+  }
+
+  @keyframes dustfall {
+    0% { transform: translateY(-10px) translateX(0); opacity: 0; }
+    10% { opacity: 0.5; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(100px) translateX(20px); opacity: 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .depth-node, .depth-node:nth-child(odd) {
+      flex-direction: column;
+      align-items: center;
+    }
+    .depth-card { width: 100%; }
+    .depth-dot { position: relative; right: auto; transform: none; margin-bottom: 12px; }
+    .depth-line { display: none; }
+    .nav-tabs { gap: 2px; }
+    .nav-tab { padding: 6px 10px; font-size: 11px; }
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-light);
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="stars" id="stars"></div>
+  <div class="cloud" style="top:40%; left:10%; width:200px; height:40px;"></div>
+  <div class="cloud" style="top:38%; left:50%; width:160px; height:35px; animation-delay:-10s;"></div>
+  <div class="cloud" style="top:42%; left:75%; width:180px; height:38px; animation-delay:-20s;"></div>
+
+  <div class="depth-scale">
+    <div class="depth-mark" style="color:rgba(168,212,230,0.5)">100 km</div>
+    <div class="depth-mark" style="color:rgba(168,212,230,0.3)">50 km</div>
+    <div class="depth-mark" style="color:rgba(168,212,230,0.2)">10 km</div>
+    <div class="depth-mark" style="color:rgba(240,216,168,0.5)">سەر زەوی</div>
+    <div class="depth-mark" style="color:rgba(200,149,107,0.5)">2 m</div>
+    <div class="depth-mark" style="color:rgba(107,78,49,0.5)">5 m</div>
+    <div class="depth-mark" style="color:rgba(74,53,32,0.7)">10 m</div>
+  </div>
+
+  <div class="hero-content">
+    <h1 class="hero-title fade-up">پشکنینی ئاسمان و زەوی</h1>
+    <p class="hero-sub fade-up fade-up-delay-1">گەشتێک لە قووڵایی ئاسمانەوە بۆ قووڵایی ١٠ مەتری زەوی — هەموو شتێک کە لە دەوروبەرمانە بەڵام نایانبینین</p>
+  </div>
+
+  <div class="scroll-indicator">
+    <i class="fas fa-chevron-down"></i>
+    <span>بڕۆ خوارەوە</span>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav class="nav-bar">
+  <div class="nav-logo">
+    <i class="fas fa-globe-asia"></i>
+    ئاسمان و زەوی
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-target="sky-section" onclick="scrollToSection('sky-section')">
+      <i class="fas fa-cloud"></i> ئاسمان
+    </button>
+    <button class="nav-tab" data-target="ground-section" onclick="scrollToSection('ground-section')">
+      <i class="fas fa-mountain"></i> زەوی
+    </button>
+    <button class="nav-tab" data-target="compare-section" onclick="scrollToSection('compare-section')">
+      <i class="fas fa-balance-scale"></i> بەراورد
+    </button>
+  </div>
+</nav>
+
+<!-- SKY SECTION -->
+<section class="sky-bg" id="sky-section">
+  <div class="section" id="sky-content">
+    <div class="section-header">
+      <div class="section-badge badge-sky">
+        <i class="fas fa-cloud"></i> چینی ئاسمان
+      </div>
+      <h2 class="section-title">ئەو شتانەی لە سەرەوەمانن</h2>
+      <p class="section-desc">ئاسمانی سەر سەرمان چەندین چینی جیاوازە — هەر چینێک جیهانێکی تایبەتی خۆی هەیە لە پەستان و پلەی گەرمی و ژیاندا</p>
+    </div>
+
+    <!-- Atmosphere Layers -->
+    <div class="atmosphere-layers">
+      <div class="atmo-layer" onclick="toggleLayer(this)">
+        <div class="atmo-color" style="background:linear-gradient(180deg,#050d1a,#0a1a35)"></div>
+        <div class="atmo-content">
+          <div>
+            <div class="atmo-name">چینی بەرینۆسفێر (Exosphere)</div>
+            <div class="atmo-range">٥٠٠ - ١٠,٠٠٠ كم</div>
+          </div>
+          <i class="fas fa-chevron-down atmo-expand-icon"></i>
+        </div>
+        <div class="atmo-detail">
+          دوا چینی ئەتمۆسفێرە — مانگێکانی دەستکرد لێرەدا دەسوڕێنەوە. گازەکان ئەوەندە کەمن کە بە ئاسانی بۆ بۆشایی ئازاد دەچن. پلەی گەرمی: ١,٧٢٧°C. پەستان: نزیکەی صفر.
+        </div>
+      </div>
+
+      <div class="atmo-layer" onclick="toggleLayer(this)">
+        <div class="atmo-color" style="background:linear-gradient(180deg,#0a1a35,#14365e)"></div>
+        <div class="atmo-content">
+          <div>
+            <div class="atmo-name">چینی تێرمۆسفێر (Thermosphere)</div>
+            <div class="atmo-range">٨٠ - ٥٠٠ کم</div>
+          </div>
+          <i class="fas fa-chevron-down atmo-expand-icon"></i>
+        </div>
+        <div class="atmo-detail">
+          چینی ئایۆنۆسفێریش پێ دەوترێت. شەبەنگی باکوور لێرەدا دروست دەبێت. وێستگەی بۆشایی نێودەوڵەتی (ISS) لە بەرزایی ٤٠٨ کم لێرەدا دەسوڕێتەوە. پلەی گەرمی: تا ٢,٠٠٠°C.
+        </div>
+      </div>
+
+      <div class="atmo-layer" onclick="toggleLayer(this)">
+        <div class="atmo-color" style="background:linear-gradient(180deg,#14365e,#2a6fa0)"></div>
+        <div class="atmo-content">
+          <div>
+            <div class="atmo-name">چینی مێزۆسفێر (Mesosphere)</div>
+            <div class="atmo-range">٥٠ - ٨٠ کم</div>
+          </div>
+          <i class="fas fa-chevron-down atmo-expand-icon"></i>
+        </div>
+        <div class="atmo-detail">
+          هەوربەستەکان (شووشەی ئاسمانی) لێرەدا دەسوڕێن و دەسووتێن — ئەوە «شووشەی لە ئاسمان» یە کە دەیانبینین. ساردترین چینی ئەتمۆسفێرە: تا -١٤٣°C.
+        </div>
+      </div>
+
+      <div class="atmo-layer" onclick="toggleLayer(this)">
+        <div class="atmo-color" style="background:linear-gradient(180deg,#2a6fa0,#5ba8d4)"></div>
+        <div class="atmo-content">
+          <div>
+            <div class="atmo-name">چینی ستراتۆسفێر (Stratosphere)</div>
+            <div class="atmo-range">١٢ - ٥٠ کم</div>\          </div>
+          <i class="fas fa-chevron-down atmo-expand-icon"></i>
+        </div>
+        <div class="atmo-detail">
+          چینی ئۆزۆن لێرەدا هەیە و پارێزگاری لە زەوی دەکات لە بەرەکانی ژەهراوی خۆر. فڕۆکەی بازرگانی لە بەرزایی ١٠-١٥ کم لێرەدا دەفڕن. پلەی گەرمی لە خوارەوە بۆ سەرەوە دەچێت: -٦٠°C بۆ ٠°C.
+        </div>
+      </div>
+
+      <div class="atmo-layer" onclick="toggleLayer(this)">
+        <div class="atmo-color" style="background:linear-gradient(180deg,#5ba8d4,#a8d4e6)"></div>
+        <div class="atmo-content">
+          <div>
+            <div class="atmo-name">چینی ترۆپۆسفێر (Troposphere)</div>
+            <div class="atmo-range">٠ - ١٢ کم</div>
+          </div>
+          <i class="fas fa-chevron-down atmo-expand-icon"></i>
+        </div>
+        <div class="atmo-detail">
+          ئەو چینەی کە تێیدا دەژین — هەموو کەش و باران و هەور و با لێرەدان. ٧٥٪ی کێشی ئەتمۆسفێر لێرەدایە. پلەی گەرمی: ١٥°C لە خوارەوە بۆ -٦٠°C لە سەرەوە.
+        </div>
+      </div>
+    </div>
+
+    <!-- Sky Charts -->
+    <div class="sky-charts">
+      <div class="chart-card">
+        <div class="chart-card-title">پلەی گەرمی بەپێی بەرزایی</div>
+        <div class="chart-card-subtitle">گۆڕانی پلەی گەرمی لە چینەکانی ئاسماندا</div>
+        <div class="chart-container" id="temp-chart"></div>
+        <div class="chart-insight">
+          <i class="fas fa-lightbulb" style="margin-left:6px"></i>
+          ستراتۆسفێر و تێرمۆسفێر پلەی گەرمیان بەرزترە لە چینەکانی نێوان خۆیان — چونکە ئۆزۆن و گەرمی خۆر لەو چینانەدا هەڵدەمۆڕن
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">پەشانی ئەتمۆسفێر بەپێی چین</div>
+        <div class="chart-card-subtitle">ڕێژەی کێشی گازەکان لە هەر چینێکدا</div>
+        <div class="chart-container" id="pressure-chart"></div>
+        <div class="chart-insight">
+          <i class="fas fa-lightbulb" style="margin-left:6px"></i>
+          ٩٩٪ی کێشی ئەتمۆسفێر لە ٣٠ کم ی خوارەوەیە — بۆیە زۆربەی ژیان و کەشوهەوا لە ترۆپۆسفێردا ڕوودەات
+        </div>
+      </div>
+    </div>
+
+    <!-- Sky Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--sky-low)"><i class="fas fa-wind"></i></div>
+        <div class="stat-value" style="color:var(--sky-low)">٧٨٪</div>
+        <div class="stat-label">نایترۆجین لە ئەتمۆسفێردا</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--accent-teal)"><i class="fas fa-tint"></i></div>
+        <div class="stat-value" style="color:var(--accent-teal)">٢١٪</div>
+        <div class="stat-label">ئۆکسجین لە ئەتمۆسفێردا</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--accent-gold)"><i class="fas fa-temperature-high"></i></div>
+        <div class="stat-value" style="color:var(--accent-gold)">١٥°C</div>
+        <div class="stat-label">تێکڕای پلەی گەرمی سەر زەوی</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--sky-mid)"><i class="fas fa-shield-alt"></i></div>
+        <div class="stat-value" style="color:var(--sky-mid)">١٠١٣</div>
+        <div class="stat-label">پەشانی ئاسمانی (هێکتۆپاسکاڵ)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GROUND SECTION -->
+<section class="ground-bg" id="ground-section">
+  <div class="section" id="ground-content">
+    <div class="section-header">
+      <div class="section-badge badge-ground">
+        <i class="fas fa-mountain"></i> قووڵایی زەوی
+      </div>
+      <h2 class="section-title">ئەو شتانەی لە ژێر پێمانن</h2>
+      <p class="section-desc">لە سەر زەویەوە بۆ قووڵایی ١٠ مەتر — جیهانێکی شاراوە لە ژێر پێماندا: لە ڕەگەکان و ئاو و کانزا و ژیانی شاراوە</p>
+    </div>
+
+    <!-- Depth Explorer -->
+    <div class="depth-explorer">
+      <div class="depth-column">
+        <div class="depth-line"></div>
+
+        <div class="depth-node">
+          <div class="depth-dot"></div>
+          <div class="depth-card">
+            <div class="depth-card-header">
+              <div class="depth-icon" style="background:rgba(107,142,35,0.2);color:#6b8e23"><i class="fas fa-leaf"></i></div>
+              <div>
+                <div class="depth-card-title">سەر زەوی — ڕووکار</div>
+                <div class="depth-card-depth">٠ مەتر</div>
+              </div>
+            </div>
+            <div class="depth-card-body">ڕووکاری زەوی: گیا، گوڵ، دار، خاکی سەرەوە. ئەو چینەی کە هەموو ژیانی سەر زەوی لێی دەست پێدەکات. گەرمی خۆر و باران و شەونشار لێرەدا کار دەکەن.</div>
+            <div class="depth-card-tags">
+              <span class="depth-tag">گیا</span>
+              <span class="depth-tag">گوڵ</span>
+              <span class="depth-tag">میکڕۆب</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depth-node">
+          <div class="depth-dot"></div>
+          <div class="depth-card">
+            <div class="depth-card-header">
+              <div class="depth-icon" style="background:rgba(139,119,42,0.2);color:#8b772a"><i class="fas fa-seedling"></i></div>
+              <div>
+                <div class="depth-card-title">چینی ڕەگەکان</div>
+                <div class="depth-card-depth">٠.٥ - ١ مەتر</div>
+              </div>
+            </div>
+            <div class="depth-card-body">ڕەگی دار و ڕووەکان لێرەدا دەگات. زۆربەی ڕەگەکان لە قووڵایی ٣٠-٩٠ سم دان. ئەم چینە پێکهاتەی خاکی بە پیت دەکات و ئاو لە خوارەوە دەهێنێت.</div>
+            <div class="depth-card-tags">
+              <span class="depth-tag">ڕەگی دار</span>
+              <span class="depth-tag">ڕەگی گژوگژ</span>
+              <span class="depth-tag">کڕۆت</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depth-node">
+          <div class="depth-dot"></div>
+          <div class="depth-card">
+            <div class="depth-card-header">
+              <div class="depth-icon" style="background:rgba(160,82,45,0.2);color:#a0522d"><i class="fas fa-mountain"></i></div>
+              <div>
+                <div class="depth-card-title">چینی خاکی بە پیت (Topsoil)</div>
+                <div class="depth-card-depth">١ - ٢ مەتر</div>
+              </div>
+            </div>
+            <div class="depth-card-body">خاکی تێکەڵ بە مادەی ئۆرگانیکی (هوموس). لێرەدا ملیۆنان مایکرۆب و کەڕم و فەنجی ژیان دەکەن. بەرگری زەوی لە باران و وشکەوە لێرەدا سەرچاوە دەگرێت.</div>
+            <div class="depth-card-tags">
+              <span class="depth-tag">هوموس</span>
+              <span class="depth-tag">مایکرۆب</span>
+              <span class="depth-tag">بەکتریا</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depth-node">
+          <div class="depth-dot"></div>
+          <div class="depth-card">
+            <div class="depth-card-header">
+              <div class="depth-icon" style="background:rgba(139,90,43,0.2);color:#8b5a2b"><i class="fas fa-layer-group"></i></div>
+              <div>
+                <div class="depth-card-title">چینی خاکی ژێر (Subsoil)</div>
+                <div class="depth-card-depth">٢ - ٤ مەتر</div>
+              </div>
+            </div>
+            <div class="depth-card-body">خاکی کەمتر پیت — کانزای لێوەشاوە و کەرەستەی بێکەسی ڕۆیشتوو. لێرەدا ئاوی ژێر زەوی دەست پێدەکات. بۆری ئاو و کەنالەکان لەم قووڵاییەدا دەنێن.</div>
+            <div class="depth-card-tags">
+              <span class="depth-tag">کانزا</span>
+              <span class="depth-tag">بەرد</span>
+              <span class="depth-tag">بۆری ئاو</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depth-node">
+          <div class="depth-dot"></div>
+          <div class="depth-card">
+            <div class="depth-card-header">
+              <div class="depth-icon" style="background:rgba(70,130,180,0.2);color:#4682b4"><i class="fas fa-water"></i></div>
+              <div>
+                <div class="depth-card-title">ئاوی ژێر زەوی</div>
+                <div class="depth-card-depth">٤ - ٧ مەتر</div>
+              </div>
+            </div>
+            <div class="depth-card-body">ئاوی شیرین کە لە نێوان بەرد و خاکدا کۆبووەتەوە. سەرچاوەی سەرەکی ئاوی خواردنەوەی زۆربەی جیهان. ئاستی ئەم ئاوە لە وەرزەکاندا دەگۆڕێت.</div>
+            <div class="depth-card-tags">
+              <span class="depth-tag">ئاوی شیرین</span>
+              <span class="depth-tag">چاڵی ئاو</span>
+              <span class="depth-tag">چەمی ئاو</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depth-node">
+          <div class="depth-dot"></div>
+          <div class="depth-card">
+            <div class="depth-card-header">
+              <div class="depth-icon" style="background:rgba(128,128,128,0.2);color:#808080"><i class="fas fa-gem"></i></div>
+              <div>
+                <div class="depth-card-title">چینی بەرد و کانزا</div>
+                <div class="depth-card-depth">٧ - ١٠ مەتر</div>
+              </div>
+            </div>
+            <div class="depth-card-body">بەردی بەهێز و کانزای خام — ئەو چینەی کە شارستانیەتەکانی کۆن لێیان تێپەڕین. بەردی چەم و کانزای ئاسن و مس لێرەدا هەن. تێکردنی بینا گەورەکان بۆ ئەم قووڵاییە دەچن.</div>
+            <div class="depth-card-tags">
+              <span class="depth-tag">بەردی سەخت</span>
+              <span class="depth-tag">ئاسن</span>
+              <span class="depth-tag">مس</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ground Charts -->
+    <div class="ground-charts">
+      <div class="chart-card">
+        <div class="chart-card-title">پێکهاتەی خاکی زەوی</div>
+        <div class="chart-card-subtitle">ڕێژەی مادەکان لە خاکی سەرەوەدا</div>
+        <div class="chart-container" id="soil-chart"></div>
+        <div class="chart-insight">
+          <i class="fas fa-lightbulb" style="margin-left:6px"></i>
+          تەنها ٥٪ی خاکی سەرەوە مادەی ئۆرگانیکیە — بەڵام ئەو ٥٪ بەتەواوی ژیانی سەر زەوی ڕادەگرێت
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">پلەی گەرمی بەپێی قووڵایی</div>
+        <div class="chart-card-subtitle">گۆڕانی گەرمی خاک لە سەرەوە بۆ ١٠ مەتر</div>
+        <div class="chart-container" id="depth-temp-chart"></div>
+        <div class="chart-insight">
+          <i class="fas fa-lightbulb" style="margin-left:6px"></i>
+          گەرمی خاک لە قووڵایی ٢ مەترەوە نزیکەی نەگۆڕ دەمێنێتەوە — هەر بۆیە ئاوی ژێر زەوی گەرمیەکی نەگۆڕی هەیە
+        </div>
+      </div>
+    </div>
+
+    <!-- Ground Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--accent-gold)"><i class="fas fa-bug"></i></div>
+        <div class="stat-value" style="color:var(--accent-gold)">١B</div>
+        <div class="stat-label">مایکرۆب لە هەر گرام خاکدا</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--accent-teal)"><i class="fas fa-tint"></i></div>
+        <div class="stat-value" style="color:var(--accent-teal)">٣٠٪</div>
+        <div class="stat-label">ئاوی شیرینی جیهان لە ژێر زەویدایە</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--ground-surface)"><i class="fas fa-ruler-vertical"></i></div>
+        <div class="stat-value" style="color:var(--ground-surface)">١٠م</div>
+        <div class="stat-label">قووڵایی پشکنین</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:#a0522d"><i class="fas fa-hourglass-half"></i></div>
+        <div class="stat-value" style="color:#a0522d">٥٠٠ساڵ</div>
+        <div class="stat-label">کاتی پێکهاتنی ١ سم خاک</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MINERALS SECTION -->
+<section class="minerals-bg" id="minerals-section">
+  <div class="section" id="minerals-content">
+    <div class="section-header">
+      <div class="section-badge" style="background:rgba(212,168,83,0.15);color:var(--accent-gold);border:1px solid rgba(212,168,83,0.2)">
+        <i class="fas fa-gem"></i> کانزاکانی ژێر زەوی
+      </div>
+      <h2 class="section-title">کانزاکانی قووڵایی ١٠ مەتر</h2>
+      <p class="section-desc">لە ژێر پێماندا کانزای بەنرخ شوێنکەوتوون — هەر کانزایەک بەها و تایبەتمەندی و بەکارهێنانی خۆی هەیە کە شارستانیەتی مرۆڤ دروستکردووە</p>
+    </div>
+
+    <div class="mineral-grid">
+      <!-- Iron -->
+      <div class="mineral-card" style="--mineral-accent:#8b7355">
+        <div class="mineral-header">
+          <div class="mineral-crystal" style="background:rgba(139,115,85,0.2);color:#c4a67a"><i class="fas fa-cube"></i></div>
+          <div>
+            <div class="mineral-name-ku">ئاسن (Fe)</div>
+            <div class="mineral-name-en">Iron — Hematite / Magnetite</div>
+          </div>
+        </div>
+        <div class="mineral-info">گرنگترین کانزای مێژووی مرۆڤایەتی — لە ئاسنی بڕۆنزەوە تا ئاسنی ستەیل. ڕەنگەکەی سور-قاوەیی تا خۆڵەمێشییە. لە قووڵایی ٥-١٠ مەتر بە شێوەی ئۆکسیدی هەیە.</div>
+        <div class="mineral-props">
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(139,115,85,0.15);color:#c4a67a"><i class="fas fa-weight-hanging"></i></div>
+            <div>
+              <div class="mineral-prop-label">چڕی</div>
+              <div class="mineral-prop-value">٧.٨٧ گ/سم³</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(139,115,85,0.15);color:#c4a67a"><i class="fas fa-fire"></i></div>
+            <div>
+              <div class="mineral-prop-label">خاڵی بوون</div>
+              <div class="mineral-prop-value">١,٥٣٨°C</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(139,115,85,0.15);color:#c4a67a"><i class="fas fa-ruler"></i></div>
+            <div>
+              <div class="mineral-prop-label">سختی</div>
+              <div class="mineral-prop-value">٤-٥ Mohs</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(139,115,85,0.15);color:#c4a67a"><i class="fas fa-industry"></i></div>
+            <div>
+              <div class="mineral-prop-label">بەکارهێنان</div>
+              <div class="mineral-prop-value">ستەیل، بینا</div>
+            </div>
+          </div>
+        </div>
+        <div class="mineral-depth-indicator">
+          <i class="fas fa-arrow-down" style="font-size:10px;color:var(--accent-gold)"></i>
+          <div class="mineral-depth-bar">
+            <div class="mineral-depth-fill" style="width:75%;background:linear-gradient(90deg,rgba(139,115,85,0.3),#8b7355)"></div>
+          </div>
+          <div class="mineral-depth-text">٥ - ١٠ م</div>
+        </div>
+      </div>
+
+      <!-- Copper -->
+      <div class="mineral-card" style="--mineral-accent:#b87333">
+        <div class="mineral-header">
+          <div class="mineral-crystal" style="background:rgba(184,115,51,0.2);color:#e8a862"><i class="fas fa-ring"></i></div>
+          <div>
+            <div class="mineral-name-ku">مس (Cu)</div>
+            <div class="mineral-name-en">Copper — Chalcopyrite / Malachite</div>
+          </div>
+        </div>
+        <div class="mineral-info">یەکێک لە کۆنترین کانزاکانی مرۆڤ — سەردەمی مس بەردەوەی سەردەمی بەرد بوو. ڕەنگەکەی سور-قاوەیی گەشاوە تا سەوز-شین دەبێت. گەرمی و کارەبا بە باشی دەگوازێت.</div>
+        <div class="mineral-props">
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(184,115,51,0.15);color:#e8a862"><i class="fas fa-weight-hanging"></i></div>
+            <div>
+              <div class="mineral-prop-label">چڕی</div>
+              <div class="mineral-prop-value">٨.٩٦ گ/سم³</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(184,115,51,0.15);color:#e8a862"><i class="fas fa-fire"></i></div>
+            <div>
+              <div class="mineral-prop-label">خاڵی بوون</div>
+              <div class="mineral-prop-value">١,٠٨٥°C</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(184,115,51,0.15);color:#e8a862"><i class="fas fa-ruler"></i></div>
+            <div>
+              <div class="mineral-prop-label">سختی</div>
+              <div class="mineral-prop-value">٢.٥-٣ Mohs</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(184,115,51,0.15);color:#e8a862"><i class="fas fa-bolt"></i></div>
+            <div>
+              <div class="mineral-prop-label">بەکارهێنان</div>
+              <div class="mineral-prop-value">کارەبا، وایەر</div>
+            </div>
+          </div>
+        </div>
+        <div class="mineral-depth-indicator">
+          <i class="fas fa-arrow-down" style="font-size:10px;color:var(--accent-gold)"></i>
+          <div class="mineral-depth-bar">
+            <div class="mineral-depth-fill" style="width:65%;background:linear-gradient(90deg,rgba(184,115,51,0.3),#b87333)"></div>
+          </div>
+          <div class="mineral-depth-text">٤ - ٨ م</div>
+        </div>
+      </div>
+
+      <!-- Limestone -->
+      <div class="mineral-card" style="--mineral-accent:#9a9a8e">
+        <div class="mineral-header">
+          <div class="mineral-crystal" style="background:rgba(154,154,142,0.2);color:#c8c8b4"><i class="fas fa-mountain"></i></div>
+          <div>
+            <div class="mineral-name-ku">بەردی ک HIک (CaCO₃)</div>
+            <div class="mineral-name-en">Limestone / Calcite</div>
+          </div>
+        </div>
+        <div class="mineral-info">بەردی سپی-قاوەیی کە زۆربەی بیناکانی کۆنی لێ دروستکراون — لە هەرەمەکانی میصر تا پیرۆزگاکانی ئەوروپا. لە ئاوی ژێر زەویدا دەبێتە هۆی دروستبوونی ئەشکەوتی سەرسوڕهێنەر.</div>
+        <div class="mineral-props">
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(154,154,142,0.15);color:#c8c8b4"><i class="fas fa-weight-hanging"></i></div>
+            <div>
+              <div class="mineral-prop-label">چڕی</div>
+              <div class="mineral-prop-value">٢.٧١ گ/سم³</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(154,154,142,0.15);color:#c8c8b4"><i class="fas fa-fire"></i></div>
+            <div>
+              <div class="mineral-prop-label">خاڵی بوون</div>
+              <div class="mineral-prop-value">١,٣٣٩°C</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(154,154,142,0.15);color:#c8c8b4"><i class="fas fa-ruler"></i></div>
+            <div>
+              <div class="mineral-prop-label">سختی</div>
+              <div class="mineral-prop-value">٣ Mohs</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(154,154,142,0.15);color:#c8c8b4"><i class="fas fa-home"></i></div>
+            <div>
+              <div class="mineral-prop-label">بەکارهێنان</div>
+              <div class="mineral-prop-value">سیمێنت، بینا</div>
+            </div>
+          </div>
+        </div>
+        <div class="mineral-depth-indicator">
+          <i class="fas fa-arrow-down" style="font-size:10px;color:var(--accent-gold)"></i>
+          <div class="mineral-depth-bar">
+            <div class="mineral-depth-fill" style="width:55%;background:linear-gradient(90deg,rgba(154,154,142,0.3),#9a9a8e)"></div>
+          </div>
+          <div class="mineral-depth-text">٣ - ٧ م</div>
+        </div>
+      </div>
+
+      <!-- Clay -->
+      <div class="mineral-card" style="--mineral-accent:#7a6b5d">
+        <div class="mineral-header">
+          <div class="mineral-crystal" style="background:rgba(122,107,93,0.2);color:#a89880"><i class="fas fa-hands"></i></div>
+          <div>
+            <div class="mineral-name-ku">گڵ (Clay)</div>
+            <div class="mineral-name-en">Kaolinite / Montmorillonite</div>
+          </div>
+        </div>
+        <div class="mineral-info">گڵ گرنگترین مادەی سەر زەوییە — لێیان کەرەستە و نەخشی و دەفر دروست کرا. خاکی زراعت بە گڵەوەیە. ئاو لە خۆیدا ڕادەگرێت و شێوە دەکات.</div>
+        <div class="mineral-props">
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(122,107,93,0.15);color:#a89880"><i class="fas fa-weight-hanging"></i></div>
+            <div>
+              <div class="mineral-prop-label">چڕی</div>
+              <div class="mineral-prop-value">١.٨-٢.٦ گ/سم³</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(122,107,93,0.15);color:#a89880"><i class="fas fa-tint"></i></div>
+            <div>
+              <div class="mineral-prop-label">لێواری ئاو</div>
+              <div class="mineral-prop-value">بەرز</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(122,107,93,0.15);color:#a89880"><i class="fas fa-ruler"></i></div>
+            <div>
+              <div class="mineral-prop-label">سختی</div>
+              <div class="mineral-prop-value">١-٢ Mohs</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(122,107,93,0.15);color:#a89880"><i class="fas fa-paint-brush"></i></div>
+            <div>
+              <div class="mineral-prop-label">بەکارهێنان</div>
+              <div class="mineral-prop-value">نەخش، دەفر</div>
+            </div>
+          </div>
+        </div>
+        <div class="mineral-depth-indicator">
+          <i class="fas fa-arrow-down" style="font-size:10px;color:var(--accent-gold)"></i>
+          <div class="mineral-depth-bar">
+            <div class="mineral-depth-fill" style="width:40%;background:linear-gradient(90deg,rgba(122,107,93,0.3),#7a6b5d)"></div>
+          </div>
+          <div class="mineral-depth-text">١ - ٥ م</div>
+        </div>
+      </div>
+
+      <!-- Quartz -->
+      <div class="mineral-card" style="--mineral-accent:#a09080">
+        <div class="mineral-header">
+          <div class="mineral-crystal" style="background:rgba(160,144,128,0.2);color:#d0c8b8"><i class="fas fa-diamond"></i></div>
+          <div>
+            <div class="mineral-name-ku">کوارتز (SiO₂)</div>
+            <div class="mineral-name-en">Quartz</div>
+          </div>
+        </div>
+        <div class="mineral-info">دووەم کانزای زۆرە لە سەر زەوی — لە هەر خاکێکدا هەیە. کریستاڵەکانی سپی و ڕووناکن و شێوەی جەندەلاویان هەیە. بەکاردێت بۆ دروستکردنی شووشە و کاتژمێر.</div>
+        <div class="mineral-props">
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(160,144,128,0.15);color:#d0c8b8"><i class="fas fa-weight-hanging"></i></div>
+            <div>
+              <div class="mineral-prop-label">چڕی</div>
+              <div class="mineral-prop-value">٢.٦٥ گ/سم³</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(160,144,128,0.15);color:#d0c8b8"><i class="fas fa-fire"></i></div>
+            <div>
+              <div class="mineral-prop-label">خاڵی بوون</div>
+              <div class="mineral-prop-value">١,٧١٥°C</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(160,144,128,0.15);color:#d0c8b8"><i class="fas fa-ruler"></i></div>
+            <div>
+              <div class="mineral-prop-label">سختی</div>
+              <div class="mineral-prop-value">٧ Mohs</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(160,144,128,0.15);color:#d0c8b8"><i class="fas fa-clock"></i></div>
+            <div>
+              <div class="mineral-prop-label">بەکارهێنان</div>
+              <div class="mineral-prop-value">شووشە، ئەلیکترۆنیک</div>
+            </div>
+          </div>
+        </div>
+        <div class="mineral-depth-indicator">
+          <i class="fas fa-arrow-down" style="font-size:10px;color:var(--accent-gold)"></i>
+          <div class="mineral-depth-bar">
+            <div class="mineral-depth-fill" style="width:85%;background:linear-gradient(90deg,rgba(160,144,128,0.3),#a09080)"></div>
+          </div>
+          <div class="mineral-depth-text">٦ - ١٠ م</div>
+        </div>
+      </div>
+
+      <!-- Gold -->
+      <div class="mineral-card" style="--mineral-accent:#d4a853">
+        <div class="mineral-header">
+          <div class="mineral-crystal" style="background:rgba(212,168,83,0.2);color:#f0d080"><i class="fas fa-coins"></i></div>
+          <div>
+            <div class="mineral-name-ku">زێر (Au) — کەم</div>
+            <div class="mineral-name-en">Gold — Trace amounts in soil</div>
+          </div>
+        </div>
+        <div class="mineral-info">لە هەر خاکێکی سەر زەویدا بە ڕێژەی زۆر کەم زێر هەیە — تەنها ٠.٠٠١ گرام لە هەر تەن خاکدا. بەڵام لە هەندێ شوێندا کانزای زێر بە قووڵایی ١٠ مەتر دۆزراوەتەوە.</div>
+        <div class="mineral-props">
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(212,168,83,0.15);color:#f0d080"><i class="fas fa-weight-hanging"></i></div>
+            <div>
+              <div class="mineral-prop-label">چڕی</div>
+              <div class="mineral-prop-value">١٩.٣٢ گ/سم³</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(212,168,83,0.15);color:#f0d080"><i class="fas fa-fire"></i></div>
+            <div>
+              <div class="mineral-prop-label">خاڵی بوون</div>
+              <div class="mineral-prop-value">١,٠٦٤°C</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(212,168,83,0.15);color:#f0d080"><i class="fas fa-ruler"></i></div>
+            <div>
+              <div class="mineral-prop-label">سختی</div>
+              <div class="mineral-prop-value">٢.٥ Mohs</div>
+            </div>
+          </div>
+          <div class="mineral-prop">
+            <div class="mineral-prop-icon" style="background:rgba(212,168,83,0.15);color:#f0d080"><i class="fas fa-coins"></i></div>
+            <div>
+              <div class="mineral-prop-label">بەکارهێنان</div>
+              <div class="mineral-prop-value">زیوینەری، ئەلیکترۆنیک</div>
+            </div>
+          </div>
+        </div>
+        <div class="mineral-depth-indicator">
+          <i class="fas fa-arrow-down" style="font-size:10px;color:var(--accent-gold)"></i>
+          <div class="mineral-depth-bar">
+            <div class="mineral-depth-fill" style="width:90%;background:linear-gradient(90deg,rgba(212,168,83,0.3),#d4a853)"></div>
+          </div>
+          <div class="mineral-depth-text">٧ - ١٠+ م</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mineral Charts -->
+    <div class="mineral-charts">
+      <div class="chart-card">
+        <div class="chart-card-title">ڕێژەی کانزاکان لە خاکی ١٠ مەتریدا</div>
+        <div class="chart-card-subtitle">تێکڕای ڕێژەی کانزاکان لە قووڵایی ژێر زەویدا</div>
+        <div class="chart-container" id="mineral-comp-chart"></div>
+        <div class="chart-insight">
+          <i class="fas fa-lightbulb" style="margin-left:6px"></i>
+          کوارتز و سیلیکات زیاتر لە ٩٠٪ی خاکی ژێر زەوی پێکدەهێنن — کانزای وەک زێر و مس تەنها بە ڕێژەی زۆر کەم هەن
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">بەراوردی سختی کانزاکان</div>
+        <div class="chart-card-subtitle">پلەی سختی بەپێی ئاستی Mohs</div>
+        <div class="chart-container" id="mineral-hardness-chart"></div>
+        <div class="chart-insight">
+          <i class="fas fa-lightbulb" style="margin-left:6px"></i>
+          کوارتز بە ٧ Mohs یەکێک لە سەختترین کانزاکانی باوە — هەر بۆیە لە با و باراندا بەردەوە دەمێنێتەوە
+        </div>
+      </div>
+    </div>
+
+    <!-- Mineral legend -->
+    <div class="mineral-legend">
+      <div class="mineral-legend-item">
+        <div class="mineral-legend-dot" style="background:#8b7355"></div>
+        ئاسن
+      </div>
+      <div class="mineral-legend-item">
+        <div class="mineral-legend-dot" style="background:#b87333"></div>
+        مس
+      </div>
+      <div class="mineral-legend-item">
+        <div class="mineral-legend-dot" style="background:#9a9a8e"></div>
+        بەردی ک HIک
+      </div>
+      <div class="mineral-legend-item">
+        <div class="mineral-legend-dot" style="background:#7a6b5d"></div>
+        گڵ
+      </div>
+      <div class="mineral-legend-item">
+        <div class="mineral-legend-dot" style="background:#a09080"></div>
+        کوارتز
+      </div>
+      <div class="mineral-legend-item">
+        <div class="mineral-legend-dot" style="background:#d4a853"></div>
+        زێر
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- COMPARISON SECTION -->
+<section class="comparison-bg" id="compare-section">
+  <div class="section" id="compare-content">
+    <div class="section-header">
+      <div class="section-badge" style="background:rgba(212,168,83,0.15);color:var(--accent-gold);border:1px solid rgba(212,168,83,0.2)">
+        <i class="fas fa-balance-scale"></i> بەراورد
+      </div>
+      <h2 class="section-title">ئاسمان vs زەوی</h2>
+      <p class="section-desc">بەراوردی نێوان جیهانی سەرەوە و جیهانی خوارەوە — هەر دووک جیهانی شاراوەی ناوازەی خۆیان هەیە</p>
+    </div>
+
+    <div class="comparison-container">
+      <div class="comparison-card">
+        <div class="comp-side comp-sky">
+          <div class="comp-label">ئاسمان</div>
+          <div class="comp-value" style="color:var(--sky-low)">-٦٠°C</div>
+          <div class="comp-unit">لە سەرەوەی ترۆپۆسفێر</div>
+        </div>
+        <div class="comp-vs">vs</div>
+        <div class="comp-side comp-ground">
+          <div class="comp-label">زەوی</div>
+          <div class="comp-value" style="color:var(--ground-surface)">١٥°C</div>
+          <div class="comp-unit">لە قووڵایی ٢ مەتر</div>
+        </div>
+      </div>
+
+      <div class="comparison-card">
+        <div class="comp-side comp-sky">
+          <div class="comp-label">پەشان</div>
+          <div class="comp-value" style="color:var(--sky-low)">٠.٠١ hPa</div>
+          <div class="comp-unit">لە بەرزایی ٥٠ کم</div>
+        </div>
+        <div class="comp-vs">vs</div>
+        <div class="comp-side comp-ground">
+          <div class="comp-label">پەشان</div>
+          <div class="comp-value" style="color:var(--ground-surface)">١,٠١٣ hPa</div>
+          <div class="comp-unit">لە سەر زەوی</div>
+        </div>
+      </div>
+
+      <div class="comparison-card">
+        <div class="comp-side comp-sky">
+          <div class="comp-label">خێرایی با</div>
+          <div class="comp-value" style="color:var(--sky-low)">٤٠٠ کم/ک</div>
+          <div class="comp-unit">لە ستراتۆسفێر</div>
+        </div>
+        <div class="comp-vs">vs</div>
+        <div class="comp-side comp-ground">
+          <div class="comp-label">جوڵەی ئاو</div>
+          <div class="comp-value" style="color:var(--ground-surface)">٠.٠١ کم/ک</div>
+          <div class="comp-unit">لە ژێر زەویدا</div>
+        </div>
+      </div>
+
+      <div class="comparison-card">
+        <div class="comp-side comp-sky">
+          <div class="comp-label">ژیان</div>
+          <div class="comp-value" style="color:var(--sky-low)">نزیکەی صفر</div>
+          <div class="comp-unit">لە بەرزایی زیاتر لە ١٥ کم</div>
+        </div>
+        <div class="comp-vs">vs</div>
+        <div class="comp-side comp-ground">
+          <div class="comp-label">ژیان</div>
+          <div class="comp-value" style="color:var(--ground-surface)">بەفرۆن</div>
+          <div class="comp-unit">لە هەر سم³ خاکدا</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison chart -->
+    <div class="chart-card" style="max-width:800px;margin:48px auto 0;">
+      <div class="chart-card-title">بەراوردی بەرزایی و قووڵایی</div>
+      <div class="chart-card-subtitle">ڕووبەری پشکنین: ١٠,٠٠٠ كم بەرز ↔ ١٠ م قووڵ</div>
+      <div class="chart-container" id="comparison-chart" style="height:320px"></div>
+      <div class="chart-insight">
+        <i class="fas fa-lightbulb" style="margin-left:6px"></i>
+        بەرزایی ئەتمۆسفێر بە سەدەها کیلۆمەتر دەپێورێت، بەڵام ژیان و گۆڕانکاری سەرەکی تەنها لە چەند کیلۆمەترێک و چەند مەترێکدا ڕوودەات
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-text">
+    پشکنینی ئاسمان و زەوی — گەشتێک لە بەرزایی ١٠,٠٠٠ کم بۆ قووڵایی ١٠ مەتر<br>
+    دروستکراوە بۆ ئاشناکردن بە جیهانی شاراوەی دەوروبەرمان
+  </div>
+  <div class="footer-source">
+    سەرچاوە: NASA Earth Observatory, USGS Soil Data, NOAA Atmospheric Data — نووسەر: OreateAI — ٢٠٢٦
+  </div>
+</footer>
+
+<script>
+// Stars generation
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 80; i++) {
+  const star = document.createElement('div');
+  star.className = 'star';
+  star.style.left = Math.random() * 100 + '%';
+  star.style.top = Math.random() * 100 + '%';
+  star.style.animationDelay = Math.random() * 3 + 's';
+  star.style.width = (Math.random() * 2 + 1) + 'px';
+  star.style.height = star.style.width;
+  starsEl.appendChild(star);
+}
+
+// Toggle atmosphere layer
+function toggleLayer(el) {
+  el.classList.toggle('expanded');
+}
+
+// Scroll to section
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// Intersection observer for fade-in
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+// Active nav tab on scroll
+const sections = ['sky-section', 'ground-section', 'minerals-section', 'compare-section'];
+const navTabs = document.querySelectorAll('.nav-tab');
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY + 100;
+  let current = '';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) current = id;
+  });
+  navTabs.forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.target === current);
+  });
+});
+
+// === ECHARTS ===
+const kurdishFont = { fontFamily: 'Noto Sans Arabic, Playfair Display' };
+
+// Temperature by altitude chart
+const tempChart = echarts.init(document.getElementById('temp-chart'));
+tempChart.setOption({
+  ...kurdishFont,
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'rgba(20,30,50,0.9)',
+    borderColor: 'transparent',
+    textStyle: { color: '#f0e6d3', fontSize: 12 }
+  },
+  grid: { left: 50, right: 20, top: 20, bottom: 40 },
+  xAxis: {
+    type: 'value',
+    name: 'پلەی گەرمی (°C)',
+    nameLocation: 'center',
+    nameGap: 25,
+    nameTextStyle: { color: '#a89880', fontSize: 11 },
+    axisLabel: { color: '#a89880', fontSize: 10 },
+    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }
+  },
+  yAxis: {
+    type: 'category',
+    data: ['بەرینۆسفێر', 'تێرمۆسفێر', 'مێزۆسفێر', 'ستراتۆسفێر', 'ترۆپۆسفێر'],
+    axisLabel: { color: '#f0e6d3', fontSize: 11 },
+    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
+  },
+  series: [{
+    type: 'bar',
+    data: [
+      { value: 1727, itemStyle: { color: '#1b3a5c' } },
+      { value: 2000, itemStyle: { color: '#2a5a8c' } },
+      { value: -100, itemStyle: { color: '#5ba8d4' } },
+      { value: 0, itemStyle: { color: '#a8d4e6' } },
+      { value: 15, itemStyle: { color: '#c8dce6' } }
+    ],
+    barWidth: 22,
+    label: {
+      show: true,
+      position: 'right',
+      formatter: '{c}°C',
+      color: '#f0e6d3',
+      fontSize: 10
+    },
+    itemStyle: { borderRadius: [0, 4, 4, 0] }
+  }]
+});
+
+// Pressure by layer chart
+const pressureChart = echarts.init(document.getElementById('pressure-chart'));
+pressureChart.setOption({
+  ...kurdishFont,
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: 'rgba(20,30,50,0.9)',
+    borderColor: 'transparent',
+    textStyle: { color: '#f0e6d3', fontSize: 12 }
+  },
+  series: [{
+    type: 'pie',
+    radius: ['42%', '70%'],
+    center: ['50%', '50%'],
+    label: {
+      color: '#f0e6d3',
+      fontSize: 11,
+      formatter: '{b}\n{d}%'
+    },
+    labelLine: { lineStyle: { color: 'rgba(255,255,255,0.2)' } },
+    data: [
+      { value: 75, name: 'ترۆپۆسفێر', itemStyle: { color: '#a8d4e6' } },
+      { value: 24.9, name: 'ستراتۆسفێر', itemStyle: { color: '#5ba8d4' } },
+      { value: 0.1, name: 'چینی سەرەوە', itemStyle: { color: '#1b3a5c' } }
+    ],
+    emphasis: {
+      itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,0,0,0.5)' }
+    }
+  }]
+});
+
+// Soil composition chart
+const soilChart = echarts.init(document.getElementById('soil-chart'));
+soilChart.setOption({
+  ...kurdishFont,
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: 'rgba(30,20,10,0.9)',
+    borderColor: 'transparent',
+    textStyle: { color: '#f0e6d3', fontSize: 12 }
+  },
+  series: [{
+    type: 'pie',
+    radius: ['42%', '70%'],
+    center: ['50%', '50%'],
+    label: {
+      color: '#f0e6d3',
+      fontSize: 11,
+      formatter: '{b}\n{d}%'
+    },
+    labelLine: { lineStyle: { color: 'rgba(255,255,255,0.15)' } },
+    data: [
+      { value: 45, name: 'کانزا (مینێراڵ)', itemStyle: { color: '#8b772a' } },
+      { value: 25, name: 'ئاو', itemStyle: { color: '#4682b4' } },
+      { value: 25, name: 'هەوا', itemStyle: { color: '#7a99aa' } },
+      { value: 5, name: 'ئۆرگانیکی', itemStyle: { color: '#6b8e23' } }
+    ],
+    emphasis: {
+      itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,0,0,0.5)' }
+    }
+  }]
+});
+
+// Temperature by depth chart
+const depthTempChart = echarts.init(document.getElementById('depth-temp-chart'));
+depthTempChart.setOption({
+  ...kurdishFont,
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'rgba(30,20,10,0.9)',
+    borderColor: 'transparent',
+    textStyle: { color: '#f0e6d3', fontSize: 12 }
+  },
+  grid: { left: 50, right: 20, top: 20, bottom: 40 },
+  xAxis: {
+    type: 'category',
+    data: ['٠م', '١م', '٢م', '٣م', '٤م', '٥م', '٧م', '١٠م'],
+    axisLabel: { color: '#a89880', fontSize: 10 },
+    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }
+  },
+  yAxis: {
+    type: 'value',
+    name: '°C',
+    nameTextStyle: { color: '#a89880', fontSize: 11 },
+    axisLabel: { color: '#a89880', fontSize: 10 },
+    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }
+  },
+  series: [{
+    type: 'line',
+    smooth: true,
+    data: [22, 19, 17, 16.5, 16, 15.8, 15.5, 15.2],
+    lineStyle: { color: '#d4a853', width: 3 },
+    itemStyle: { color: '#d4a853' },
+    areaStyle: {
+      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: 'rgba(212,168,83,0.3)' },
+        { offset: 1, color: 'rgba(212,168,83,0)' }
+      ])
+    },
+    symbol: 'circle',
+    symbolSize: 8
+  }]
+});
+
+
+// Mineral composition chart
+const mineralCompChart = echarts.init(document.getElementById('mineral-comp-chart'));
+mineralCompChart.setOption({
+  ...kurdishFont,
+  tooltip: {
+    trigger: 'item',
+    backgroundColor: 'rgba(30,20,10,0.9)',
+    borderColor: 'transparent',
+    textStyle: { color: '#f0e6d3', fontSize: 12 },
+    formatter: '{b}: {d}%'
+  },
+  series: [{
+    type: 'pie',
+    radius: ['38%', '68%'],
+    center: ['50%', '50%'],
+    label: {
+      color: '#f0e6d3',
+      fontSize: 11,
+      formatter: function(p) {
+        return p.percent < 3 ? '' : p.name + '\n' + p.percent + '%';
+      }
+    },
+    labelLine: { lineStyle: { color: 'rgba(255,255,255,0.15)' } },
+    data: [
+      { value: 45, name: 'کوارتز و سیلیکات', itemStyle: { color: '#a09080' } },
+      { value: 25, name: 'گڵ', itemStyle: { color: '#7a6b5d' } },
+      { value: 12, name: 'بەردی ک HIک', itemStyle: { color: '#9a9a8e' } },
+      { value: 10, name: 'ئاسن (ئۆکسید)', itemStyle: { color: '#8b7355' } },
+      { value: 5, name: 'مس و کانزای تر', itemStyle: { color: '#b87333' } },
+      { value: 2.9, name: 'مادەی ئۆرگانیکی', itemStyle: { color: '#6b8e23' } },
+      { value: 0.1, name: 'زێر و کانزای دڵ', itemStyle: { color: '#d4a853' } }
+    ],
+    emphasis: {
+      itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,0,0,0.5)' }
+    }
+  }]
+});
+
+// Mineral hardness chart
+const mineralHardChart = echarts.init(document.getElementById('mineral-hardness-chart'));
+mineralHardChart.setOption({
+  ...kurdishFont,
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'rgba(30,20,10,0.9)',
+    borderColor: 'transparent',
+    textStyle: { color: '#f0e6d3', fontSize: 12 }
+  },
+  grid: { left: 50, right: 20, top: 20, bottom: 40 },
+  xAxis: {
+    type: 'value',
+    name: 'Mohs',
+    nameLocation: 'center',
+    nameGap: 25,
+    nameTextStyle: { color: '#a89880', fontSize: 11 },
+    axisLabel: { color: '#a89880', fontSize: 10 },
+    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+    min: 0,
+    max: 10
+  },
+  yAxis: {
+    type: 'category',
+    data: ['گڵ', 'زێر', 'مس', 'بەردی ک HIک', 'ئاسن', 'کوارتز'],
+    axisLabel: { color: '#f0e6d3', fontSize: 11 },
+    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
+  },
+  series: [{
+    type: 'bar',
+    data: [
+      { value: 1.5, itemStyle: { color: '#7a6b5d' } },
+      { value: 2.5, itemStyle: { color: '#d4a853' } },
+      { value: 3, itemStyle: { color: '#b87333' } },
+      { value: 3, itemStyle: { color: '#9a9a8e' } },
+      { value: 4.5, itemStyle: { color: '#8b7355' } },
+      { value: 7, itemStyle: { color: '#a09080' } }
+    ],
+    barWidth: 22,
+    label: {
+      show: true,
+      position: 'right',
+      formatter: '{c} Mohs',
+      color: '#f0e6d3',
+      fontSize: 10
+    },
+    itemStyle: { borderRadius: [0, 4, 4, 0] }
+  }]
+});
+
+// Comparison chart
+const compChart = echarts.init(document.getElementById('comparison-chart'));
+compChart.setOption({
+  ...kurdishFont,
+  tooltip: {
+    trigger: 'axis',
+    backgroundColor: 'rgba(20,30,50,0.9)',
+    borderColor: 'transparent',
+    textStyle: { color: '#f0e6d3', fontSize: 12 }
+  },
+  grid: { left: 60, right: 60, top: 30, bottom: 40 },
+  legend: {
+    data: ['ئاسمان', 'زەوی'],
+    textStyle: { color: '#f0e6d3', fontSize: 11 },
+    top: 0
+  },
+  xAxis: {
+    type: 'category',
+    data: ['پلەی گەرمی', 'پەشان', 'خێرایی', 'چڕانی ژیان', 'گەڕانی ئاو'],
+    axisLabel: { color: '#a89880', fontSize: 10, interval: 0 },
+    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }
+  },
+  yAxis: {
+    type: 'value',
+    name: 'ڕێژەی نۆرمالکراو',
+    nameTextStyle: { color: '#a89880', fontSize: 10 },
+    axisLabel: { color: '#a89880', fontSize: 10 },
+    axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }
+  },
+  series: [
+    {
+      name: 'ئاسمان',
+      type: 'bar',
+      data: [80, 5, 95, 1, 60],
+      itemStyle: { color: '#5ba8d4', borderRadius: [3,3,0,0] },
+      barWidth: 18
+    },
+    {
+      name: 'زەوی',
+      type: 'bar',
+      data: [20, 100, 2, 95, 40],
+      itemStyle: { color: '#8b6f47', borderRadius: [3,3,0,0] },
+      barWidth: 18
+    }
+  ]
+});
+
+// Responsive resize
+window.addEventListener('resize', () => {
+  tempChart.resize();
+  pressureChart.resize();
+  soilChart.resize();
+  depthTempChart.resize();
+  mineralCompChart.resize();
+  mineralHardChart.resize();
+  compChart.resize();
+});
+</script>
+
+</body>
+</html>
